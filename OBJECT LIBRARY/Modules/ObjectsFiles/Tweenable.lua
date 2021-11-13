@@ -3,7 +3,6 @@ if fw == nil then return false end;
 
 local reg = fw.new.Register('TweenStyle');
 reg.Library = 'BUILTIN';
-reg.InheritOnly = true;
 
 reg.Constructor = function(obj, con)
 

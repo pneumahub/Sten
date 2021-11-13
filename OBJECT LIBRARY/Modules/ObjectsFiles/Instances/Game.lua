@@ -20,6 +20,8 @@ reg.Constructor = function(obj, con)
     con.Mouse = fw.new('BUILTIN::Mouse');
     con.Mouse.Locked = true;
 
+    con.Input = fw.new('BUILTIN::Input');
+
     con.Tick.Value:Connect(function(...)
         obj.Mouse.Tick(...);
         local c = obj:GetChildren();

@@ -407,7 +407,8 @@ local newFunctions = {
 					error('Cannot assign Object '..classname..' to Library '..new..': LIBRARY IS RESTRICTED.', 2);
 				end
 				local r = getreg((new and new..'::' or '')..classname);
-				if r ~= nil and new ~= 'UNSORTED' then
+				if r ~= nil and new ~= 'UNSORTED' and r ~= t_con then
+					print((new and new..'::' or '')..classname)
 					error('Cannot assign Object '..classname..' to Library '..new..': LIBRARY ALREADY CONTAINS CLASS.', 2);
 				end
 			end
@@ -422,7 +423,7 @@ local newFunctions = {
 };
 
 fw.new = newproxy(true);
-getmetatable(fw.new).__call = function(tbl, class, ...)
+getmetatable(fw.new).__call = function(self, class, ...)
 	if class == nil then
 		return initObj();
 	end
