@@ -1,0 +1,7 @@
+Now:
+-Event "Connections" property that shows the number of connections
+ Update Objects to check the number of connections of each changed event when they are up to fire. If 0, destroy the event.
+
+Future:
+
+TBD:
