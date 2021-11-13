@@ -1,7 +1,7 @@
 local fw = _G.Framework;
 if fw == nil then return false end;
 
-local reg = fw.new.Register('TweenEase');
+local reg = fw.new.Register('TweenStyle');
 reg.Library = 'BUILTIN';
 reg.InheritOnly = true;
 
@@ -39,26 +39,40 @@ reg.Constructor = function(obj, con)
 
     end
     con.Tween.Locked = true;
-
 end
 
-local to, tc = fw.new()
-tc.__call = function(self, ...)
-    --Members <table>
-    --Ease <BUILTIN::TweenStyle.Direction>
-    --Time <number>
-    --Speed <number> (-0 : UNKNOWN) (0-1 : SLOWED DOWN) (1+ : SPEED UP)
-    --Override <boolean> -- Whether or not to interrupt any tweens interpolating the same members.
-        -- EXAMPLE:
-        --[Previous]   [Override]
-        -- Tween1       Tween2 
-        -- Size         Size        -- The only change is Tween1 will no longer modify Size
-        -- Background               -- Background will continue to tween.
-        -- NOTE(Pneuma): Potentially may allow for a function. A table of the running properties will be passed 
-        --               and the caller can control the overrides
-    --Callback 
-    local arg1, arg2, arg3, arg4, arg5 = table.unpack({...});
+local to, tc = fw.new();
+tc.__call = function(tween, ...)
+    fw.verifyarg(tween, 'BUILTIN::Tweenable', error)
+    local Members, Ease, Time, Speed, Override, Callback = table.unpack({...});
+    
+    if type(Members) == 'Object' and Members:IsA('BUILTIN::TweenSettings') then
+        local ts = Members;
+        Members = ts.Members;
+        Ease = ts.Style.Ease;
+        Time = ts.Time;
+        Speed = ts.Speed;
+        Override = ts.Override;
+        Callback = ts.Callback;
+    elseif type(Members) == 'Table' then
+        local ts = Members;
+        Members = ts.Members;
+        Ease = ts.Style.Ease;
+        Time = ts.Time;
+        Speed = ts.Speed;
+        Override = ts.Override;
+        Callback = ts.Callback;
+    end
 
+    Members = fw.verifyarg(Members, 'table', print) and Members or {};
+    Ease = fw.verifyarg(Ease, 'function', print) and Ease or Tween.Style.Sine.InOut;
+    Time = fw.verifyarg(Time, 'number', print) and Time or 1;
+    Speed = fw.verifyarg(Speed, 'number', print) and Speed or 1;
+    Override = fw.verifyarg(Override, 'boolean', print) and Override or true;
+    
+    local connection;
+    connection = fw.Engine.Tick:Connect(function(dt)
+    end)
 end
 
 tc.Style = {};

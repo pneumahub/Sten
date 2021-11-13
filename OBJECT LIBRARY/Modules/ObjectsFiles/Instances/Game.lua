@@ -35,8 +35,8 @@ reg.Constructor = function(obj, con)
         end
     end)
     
-    fw.Love.Render:Connect(con.Render.Value.Fire());
-    fw.Love.Tick:Connect(con.Tick.Value.Fire());
+    fw.Engine.Render:Connect(con.Render.Value.Fire());
+    fw.Engine.Tick:Connect(con.Tick.Value.Fire());
 end
 
 return true;

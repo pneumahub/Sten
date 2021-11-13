@@ -1,10 +1,10 @@
 local fw = _G.Framework;
 if fw == nil then return false end;
 
-fw.Love = {};
+fw.Engine = {};
 
-fw.Love.Tick = fw.new('BUILTIN::Event');
-fw.Love.Render = fw.new('BUILTIN::Event');
+fw.Engine.Tick = fw.new('BUILTIN::Event');
+fw.Engine.Render = fw.new('BUILTIN::Event');
 
 function love.run()
 	if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
@@ -34,13 +34,13 @@ function love.run()
 
 		-- Call update and draw
 		if love.update then love.update(dt) end -- will pass 0 if love.timer is disabled
-		fw.Love.Tick:Fire(dt);
+		fw.Engine.Tick:Fire(dt);
 		
 		if love.graphics and love.graphics.isActive() then
 			love.graphics.origin()
 			love.graphics.clear(love.graphics.getBackgroundColor())
 
-			fw.Love.Render:Fire(dt);
+			fw.Engine.Render:Fire(dt);
 			if love.draw then love.draw() end
 
 			love.graphics.present()

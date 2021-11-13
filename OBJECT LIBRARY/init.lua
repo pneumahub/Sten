@@ -211,7 +211,7 @@ for i, v in pairs(love.filesystem.getDirectoryItems('OBJECT LIBRARY/Modules')) d
 	end
 end
 
-require('OBJECT LIBRARY/initLove2D');
+require('OBJECT LIBRARY/initEngine');
 
 fw.Loaded:Fire();
 
