@@ -36,20 +36,50 @@ end
 reg = fw.new.Register('2DPolygon');
 reg.Library = "BUILTIN::Datatypes";
 
-reg.Constructor = function(obj, con)
+reg.Constructor = function(obj, con, ...)
     local polygon = {};
-    con.getPoints = function()
-        return table.clone(polygon);
-    end
-
-    con.clearPoints = function()
-        for i = #polygon, 1, -1 do
-            polygon[i] = nil;
+    local args = {...};
+    for i = 1, #args do
+        print('Hello?')
+        local v = args[i];
+        if type(v) == 'number' then
+            local v2 = args[i + 1];
+            
+            table.insert(polygon, v);
+            table.insert(polygon, type(v2) == 'number' and v2 or 0);
+            
+            if type(v2) == 'number' then
+                i=i+1;
+            end
+            goto continue;
         end
+
+        if type(v) == 'table' then
+            local x,y = v[1] or v.X or v.x or 0, v[2] or v.Y or v.y or 0
+            table.insert(polygon, type(x) == 'number' and x or 0);
+            table.insert(polygon, type(y) == 'number' and y or 0);
+        end
+
+        ::continue::
     end
 
-    con.addPoint = function(p)
-        table.insert(polygon, p);
+    con.__pairs = function(t)
+        local k = 0;
+        return function()
+            if #polygon == 0 then return end;
+            k = k + 1;
+            print(table.unpack(obj[k]))
+            return k ~= #polygon/2 + 1 and k or nil, obj[k];
+		end, t, nil
+    end
+
+    con.__len = function()
+        return #polygon / 2;
+    end
+
+    con.__index = function(index)
+        if type(index) ~= 'number' then return end;
+        return {polygon[(index*2)-1], polygon[index*2]};
     end
 end
 

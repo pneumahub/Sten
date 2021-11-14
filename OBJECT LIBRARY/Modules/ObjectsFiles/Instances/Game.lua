@@ -6,8 +6,6 @@ reg.Library = "BUILTIN";
 reg.Inherits "BUILTIN::Instance"
 
 reg.Constructor = function(obj, con)
-    obj.Name = 'Game';
-
     con.Parent = nil;
     con.Parent.Locked = true;
 
@@ -21,6 +19,7 @@ reg.Constructor = function(obj, con)
     con.Mouse.Locked = true;
 
     con.Input = fw.new('BUILTIN::Input');
+    con.Input.Locked = true;
 
     con.Tick.Value:Connect(function(...)
         obj.Mouse.Tick(...);

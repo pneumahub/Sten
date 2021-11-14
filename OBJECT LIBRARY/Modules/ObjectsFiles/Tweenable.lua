@@ -18,9 +18,13 @@ reg.Library = 'BUILTIN';
 
 reg.Constructor = function(obj, con)
 
-    con.Direction = 'Sine';
-    
+    con.Style = Tween.Style.Sine;
+    con.Style.Whitelist();
 
+    con.Members = {};
+    con.Members.Whitelist();
+
+    
 end
 
 local step = function(self, dt)
@@ -32,8 +36,6 @@ reg.Library = 'BUILTIN';
 reg.InheritOnly = true;
 
 reg.Constructor = function(obj, con)
-    local tick = fw.Love.Tick;
-
     con.Interpolate = function(dt)
 
     end
@@ -43,12 +45,12 @@ end
 local to, tc = fw.new();
 tc.__call = function(tween, ...)
     fw.verifyarg(tween, 'BUILTIN::Tweenable', error)
-    local Members, Ease, Time, Speed, Override, Callback = table.unpack({...});
+    local Members, Style, Time, Speed, Override, Callback = table.unpack({...});
     
-    if type(Members) == 'Object' and Members:IsA('BUILTIN::TweenSettings') then
+    if typeof(Members) == 'Object' and Members:IsA('BUILTIN::TweenSettings') then
         local ts = Members;
         Members = ts.Members;
-        Ease = ts.Style.Ease;
+        Style = ts.Style;
         Time = ts.Time;
         Speed = ts.Speed;
         Override = ts.Override;
@@ -56,7 +58,7 @@ tc.__call = function(tween, ...)
     elseif type(Members) == 'Table' then
         local ts = Members;
         Members = ts.Members;
-        Ease = ts.Style.Ease;
+        Style = ts.Style;
         Time = ts.Time;
         Speed = ts.Speed;
         Override = ts.Override;
@@ -64,7 +66,7 @@ tc.__call = function(tween, ...)
     end
 
     Members = fw.verifyarg(Members, 'table', print) and Members or {};
-    Ease = fw.verifyarg(Ease, 'function', print) and Ease or Tween.Style.Sine.InOut;
+    Style = fw.verifyarg(Style, 'BUILTIN::TweenStyle', print) and Style or Tween.Style.Sine;
     Time = fw.verifyarg(Time, 'number', print) and Time or 1;
     Speed = fw.verifyarg(Speed, 'number', print) and Speed or 1;
     Override = fw.verifyarg(Override, 'boolean', print) and Override or true;

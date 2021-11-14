@@ -22,12 +22,11 @@ reg.Constructor = function(obj, con)
     con.AbsoluteSize.Locked = true;
 
     local function updatePoints()
-        local bounds = con.Bounds.Value;
-        bounds.clearPoints();
-        bounds.addPoint({X = obj.AbsolutePosition.X, Y = obj.AbsolutePosition.Y});
-        bounds.addPoint({X = obj.AbsolutePosition.X + obj.AbsoluteSize.X, Y = obj.AbsolutePosition.Y});
-        bounds.addPoint({X = obj.AbsolutePosition.X + obj.AbsoluteSize.X, Y = obj.AbsolutePosition.Y + obj.AbsoluteSize.Y});
-        bounds.addPoint({X = obj.AbsolutePosition.X, Y = obj.AbsolutePosition.Y + obj.AbsoluteSize.Y});
+        con.Bounds = Instance.new('2DPolygon',
+                                    {X = obj.AbsolutePosition.X, Y = obj.AbsolutePosition.Y},
+                                    {X = obj.AbsolutePosition.X + obj.AbsoluteSize.X, Y = obj.AbsolutePosition.Y},
+                                    {X = obj.AbsolutePosition.X + obj.AbsoluteSize.X, Y = obj.AbsolutePosition.Y + obj.AbsoluteSize.Y},
+                                    {X = obj.AbsolutePosition.X, Y = obj.AbsolutePosition.Y + obj.AbsoluteSize.Y});
     end
 
     local function updateAbs()

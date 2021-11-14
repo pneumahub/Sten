@@ -17,18 +17,13 @@ reg.Constructor = function(obj, con)
 
     local oldRender = obj.Render;
     con.Render = function(...)
-        local p = {};
-        local ps = con.Bounds.Value.getPoints();
-        for i = 1, #ps do
-            table.insert(p,ps[i].X);
-            table.insert(p,ps[i].Y);
-        end
-        if #ps > 3 then
+        local p = table.clone(obj.Bounds);
+        if #p >= 3 then
             love.graphics.setColor(obj.Color.R/255, obj.Color.G/255, obj.Color.B/255, obj.Color.A);
-            love.graphics.polygon('fill', p);
+            love.graphics.polygon('fill', table.unpack(table.unpack(p)));
         end
 
-        oldRender(...)
+        oldRender(...);
     end
 end
 

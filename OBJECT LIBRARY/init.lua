@@ -55,20 +55,11 @@ fw.Memoize = function(fun)
 	end
 end
 
-local prevType = type;
-getfenv().type = function(obj)
+getfenv().typeof = function(obj)
 	if fw.isObject(obj) then
 		return 'Object';
 	else
-		return prevType(obj);
-	end
-end
-
-getfenv().typeof = function(obj)
-	if prevType(obj) == 'Object' then
-		return getmetatable(obj).__getTypeof(obj);
-	else
-		return prevType(obj);
+		return type(obj);
 	end
 end
 
@@ -78,6 +69,16 @@ getfenv().Vector2 = {new = function(...) return fw.new('BUILTIN::Vector2', ...) 
 
 -- TODO(Pneuma): Implement classes
 getfenv().Vector3 = {new = function(...) return fw.new('BUILTIN::Vector2', ...) end} 
+
+local oldpairs = pairs;
+getfenv().pairs = function(...) 
+	local a = {...};
+	local obj = a[1];
+	if type(getmetatable(obj)) == 'table' and type(getmetatable(obj).__pairs) == 'function' then
+		return getmetatable(obj).__pairs(...);
+	end
+	return oldpairs(...);
+end
 
 string.split = function(s, delimiter)
     result = {}
@@ -91,22 +92,29 @@ table.pack = function(...)
 	return {...}
 end
 
-table.unpack = function(tble)
+table.unpack = function(...)
 	local str = [[
 		return %s
 	]]
 	local f = "";
-	for i = 1, #tble do
-		f = f~='' and f..', ' or f;
-		f = f..'tble['..i..']'
+	local temp = {};
+	for i, v in pairs({...}) do
+		for _, v in pairs(v) do
+			print(v)
+			local ii = #temp + 1;
+			temp[ii] = v;
+			f = f~='' and f..', ' or f;
+			f = f..'temp['..ii..']';
+		end
 	end
+	print(string.format(str, f))
 	f = loadstring(string.format(str, f));
-	getfenv(f).tble = tble;
+	getfenv(f).temp = temp;
 	return f()
 end
 
 table.find = function(tble, val)
-	for i, v in pairs(tble) do
+	for i, v in next, tble do
 		if v == val then
 			return i;
 		end
@@ -123,15 +131,15 @@ end
 
 fw.verifyarg = function(a, t, r, m, l)
 	if t == nil then
-		error('Missing argument #2: Typeof [table | string]', 2);
+		error('Missing argument #2: type [table | string]', 2);
 	end	
 	
-	if typeof(t) ~= 'table' and typeof(t) ~= 'string' then
-		error('Invalid argument #2: Expected [table | string], got '..typeof(t), 2);
+	if type(t) ~= 'table' and type(t) ~= 'string' then
+		error('Invalid argument #2: Expected [table | string], got '..type(t), 2);
 	end
 	
 	local metType = false;
-	if typeof(t) == 'table' then
+	if type(t) == 'table' then
 		for i, v in pairs(t) do
 			local isa = false;
 			if fw.isObject(a) then 
@@ -141,14 +149,14 @@ fw.verifyarg = function(a, t, r, m, l)
 				metType = true;
 				break;
 			end
-			if (typeof(a) == v) then
+			if (type(a) == v) then
 				metType = true;
 				break;
 			end
 			::continue::
 		end
 	else
-		if typeof(a) == t then
+		if type(a) == t then
 			metType = true;
 		end
 	end
@@ -156,7 +164,7 @@ fw.verifyarg = function(a, t, r, m, l)
 	if metType == false then
 		if m == nil then
 			m = m or 'Invalid type: Expected ';
-			if typeof(t) == 'table' and #t > 1 then
+			if type(t) == 'table' and #t > 1 then
 				m = m..'[';
 				for i, v in pairs(t) do
 					m = m..'"'..v..'" | ';
@@ -164,10 +172,10 @@ fw.verifyarg = function(a, t, r, m, l)
 				m = string.sub(m, 0,-4);
 				m = m..']';
 			else
-				m = m..'"'..(typeof(t) == 'string' and t or t[1])..'"';
+				m = m..'"'..(type(t) == 'string' and t or t[1])..'"';
 			end
-			local t = typeof(a);
-			if fw.isObject(a) then
+			local t = type(a);
+			if type(a) == 'userdata' and fw.isObject then
 				t = (a.getLibrary() and a.getLibrary()..'::' or '')..a.ClassName;
 			end
 			m = m..', got "'..t..'".';	

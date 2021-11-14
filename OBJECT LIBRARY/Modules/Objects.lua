@@ -4,7 +4,7 @@ if fw == nil then return false end;
 local unique = tostring({});
 
 fw.isObject = function(obj)
-	if typeof(obj) == 'userdata' and getmetatable(obj).__getunique() == unique then
+	if type(obj) == 'userdata' and getmetatable(obj).__getunique() == unique then
 		return true
 	end
 	return false;
@@ -87,7 +87,7 @@ createobj = function(reg)
 					if fw.isObject(tmp.Value) then
 						val = (tmp.Value.getLibrary() and tmp.Value.getLibrary()..'::' or '')..tmp.Value.ClassName;
 					else
-						val = typeof(tmp.Value);
+						val = type(tmp.Value);
 					end
 				end
 				table.insert(tble, val);
@@ -258,7 +258,7 @@ createobj = function(reg)
 				if (internal[index]['Internal'] == true and i ~= 'Value') or i == 'Changed' then
 					error('Cannot modify '..index..'.'..i..': Member setting is locked.', 2);
 				end
-				if i ~= 'Value' then fw.verifyarg(new, typeof(internal[index][i]), nil, 2) end;
+				if i ~= 'Value' then fw.verifyarg(new, type(internal[index][i]), nil, 2) end;
 				internal[index][i] = new;
 			end
 		});
@@ -270,7 +270,8 @@ createobj = function(reg)
 		createProperty(name, {Hidden = true; Internal = true; Whitelist = {'function'}; Value = nil});
 	end
 	
-	createOverload('__getTypeof', function(self)
+	createOverload('__getTypeof', function(self) --TODO(Pneuma): Remake this
+		if fw.verifyarg(reg, 'userdata') == false then return '<'..(self == interface and 'interface' or 'controller')..'>' end
 		return '<'..(self == interface and 'interface' or 'controller')..'> '..reg.Class.Value;
 	end);
 	
@@ -282,14 +283,16 @@ createobj = function(reg)
 		end
 	end);
 
-	createOverload('__pairs', function(self)
-		if internal['__pairs'].Value then return internal['__pairs'].Value(self) end;
+	createOverload('__pairs', function(...)
+		local args = {...};
+		local self = args[1];
+		if internal['__pairs'].Value then return internal['__pairs'].Value(...) end;
 		if self == interface then return function(_, k)
 			local v
 			repeat
 				k, v = next(internal, k)
 			until k == nil or v.Hidden == false
-				return k, v.Value
+				return k, v ~= nil and v.Value or nil
 		end, t, nil end
 
 		if self == controller then return function(_, k)
@@ -300,6 +303,18 @@ createobj = function(reg)
 				return k, v.Value
 		end, t, nil end
 	end);
+
+	createOverload('__len', function(self)
+		if internal['__len'].Value then return internal['__len'].Value(self) end;
+		local amt = 0;
+		for i = 1, #internal do
+			local v = internal[i];
+			if (self == interface and v.Hidden == false) or self == controller then
+				amt = amt + 1;
+			end
+		end
+		return amt;
+	end)
 		
 	return interface, controller;
 end
@@ -324,6 +339,12 @@ local function initObj(lib)
 	getmetatable(obj_c).__getLink = function()
 		return link;
 	end
+
+	getmetatable(obj_c).__tostring = function() return obj_i.ClassName end
+	getmetatable(obj_i).__tostring = function() return obj_i.ClassName end
+
+	getmetatable(obj_i).__name = obj_i.ClassName;
+	getmetatable(obj_c).__name = obj_i.ClassName;
 	
 	return obj_i, obj_c;
 end
@@ -332,12 +353,11 @@ local restrictedLibs = {};
 
 local inherit;
 inherit = function(t,c,rh, ...)
-	local rv = typeof(rh) == 'table' and rh or rh.InheritList.Value;
+	local rv = type(rh) == 'table' and rh or rh.InheritList.Value;
 	for i = 1, #rv, 1 do
 		local r = getreg(rv[i]);
 		if r then
-			print(type(rh))
-			if type(rh) == 'Object' then
+			if typeof(rh) == 'Object' then
 				rh.InheritRegs.Value[i] = r;
 			end
 			if r.Constructor.Value == nil then
@@ -355,7 +375,7 @@ local newFunctions = {
 	end,
 	Inherit = function(lib, ...)
 		fw.verifyarg(lib, {'table', 'string'}, error, nil, 2);
-		lib = typeof(lib) == 'table' and lib or {lib};
+		lib = type(lib) == 'table' and lib or {lib};
 		local io, ic = fw.new();
 		inherit(io, ic, lib, ...);
 		return io;

@@ -3,6 +3,11 @@ if fw == nil then return false end;
 
 fw.Engine = {};
 
+function love.load(arg)
+	print('HELLO?!')
+	fw.Engine.Arguments = arg;
+end
+
 fw.Engine.Tick = fw.new('BUILTIN::Event');
 fw.Engine.Render = fw.new('BUILTIN::Event');
 
