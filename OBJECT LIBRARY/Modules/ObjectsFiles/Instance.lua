@@ -94,6 +94,14 @@ reg.Constructor = function(obj, con)
     end;
     con.Render.Locked = true;
 
+    con.ClientMessage = function(...)
+        local c = obj:GetChildren();
+        for i = 1, #c do
+            c[i].ClientMessage(...);
+        end
+    end
+    con.ClientMessage.Locked = true;
+
     con.__index = function(index)
         return children[index];
     end

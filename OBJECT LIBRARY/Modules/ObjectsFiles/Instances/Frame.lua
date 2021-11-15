@@ -2,7 +2,7 @@ local fw = _G.Framework;
 if fw == nil then return false end;
 
 local reg = fw.new.Register('Frame');
-reg.Library = "BUILTIN";
+reg.Library = "BUILTIN::GuiObject";
 reg.Inherits 'BUILTIN::2DRenderObject';
 
 reg.Constructor = function(obj, con)
@@ -37,7 +37,6 @@ reg.Constructor = function(obj, con)
         con.AbsoluteSize = fw.new('BUILTIN::Vector2', 
             (parents.X * obj.Size.X.Scale) + obj.Size.X.Offset, 
             (parents.Y * obj.Size.Y.Scale) + obj.Size.Y.Offset);
-        print(obj.AbsoluteSize.X, obj.AnchorPoint.X)
         con.AbsolutePosition = fw.new('BUILTIN::Vector2', 
             parentp.X + (parents.X * obj.Position.X.Scale) + obj.Position.X.Offset - (obj.AbsoluteSize.X * obj.AnchorPoint.X),
             parentp.Y + (parents.Y * obj.Position.Y.Scale) + obj.Position.Y.Offset - (obj.AbsoluteSize.Y * obj.AnchorPoint.Y));
@@ -56,6 +55,12 @@ reg.Constructor = function(obj, con)
 
     con.AbsoluteSize.Changed:Connect(updatePoints);
     con.AbsolutePosition.Changed:Connect(updatePoints);
+
+    local oldTick = con.Tick.Value;
+    con.Tick.Value = function(...)
+        updateAbs();
+        oldTick(...);
+    end
 
     con.UpdateAbsoluteValues = updateAbs;
     con.UpdateAbsoluteValues.Locked = true;

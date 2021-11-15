@@ -68,6 +68,7 @@ createobj = function(reg)
 	local class = reg and reg.Class and reg.Class.Value or "OBJECT";		
 	
 	local internal = {}
+	local overloads = {};
 
 	local function createProperty(name, args)
 		fw.verifyarg(name, 'string', error, nil, 2);
@@ -158,7 +159,7 @@ createobj = function(reg)
 		if internal.__DestroyCallback.Value ~= nil then
 			internal.__DestroyCallback.Value();
 		else
-			error(class..' cannot be destroyed.', 3);
+			
 		end
 	end});
 	
@@ -267,6 +268,7 @@ createobj = function(reg)
 	local function createOverload(name, func)
 		getmetatable(interface)[name] = func;
 		getmetatable(controller)[name] = func;
+		overloads[name] = func;
 		createProperty(name, {Hidden = true; Internal = true; Whitelist = {'function'}; Value = nil});
 	end
 	
@@ -315,6 +317,13 @@ createobj = function(reg)
 		end
 		return amt;
 	end)
+
+	createOverload('__gc', function()
+		if internal['__DestroyCallback'].Value then return internal['__DestroyCallback'].Value() end;
+		for i = #internal, 1, -1 do
+			internal[i].Remove();
+		end
+	end)
 		
 	return interface, controller;
 end
@@ -353,6 +362,9 @@ local restrictedLibs = {};
 
 local inherit;
 inherit = function(t,c,rh, ...)
+	--TODO(Pneuma): Formatting error callbacks
+	--				Example: "BUILTIN:2DRenderObject"
+
 	local rv = type(rh) == 'table' and rh or rh.InheritList.Value;
 	for i = 1, #rv, 1 do
 		local r = getreg(rv[i]);
@@ -419,24 +431,31 @@ local newFunctions = {
 		getmetatable(t_obj).__newindex = function(tble, index, new)
 			if index == "Library" and new ~= nil then
 				fw.verifyarg(new, 'string', error, nil, 2);
-				
-				-- It is not recommended to remove this line of code to lift the BUILTIN or PneumaLib restriction for yourself.
-				-- It will be readded every update automatically.
-				-- If wish to lift it without it being replaced, use "SET_LIBRARY_LOCK(false)" in the command bar.
+
+				--TODO(Pneuma): Formatting error callbacks
+	--				Example: "BUILTIN:2DRenderObject"
+
 				if table.find(restrictedLibs, string.split(new, '::')[1]) then
 					error('Cannot assign Object '..classname..' to Library '..new..': LIBRARY IS RESTRICTED.', 2);
 				end
+
 				local r = getreg((new and new..'::' or '')..classname);
 				if r ~= nil and new ~= 'UNSORTED' and r ~= t_con then
-					print((new and new..'::' or '')..classname)
 					error('Cannot assign Object '..classname..' to Library '..new..': LIBRARY ALREADY CONTAINS CLASS.', 2);
 				end
 			end
 			prevIndex(tble, index, new);
 		end
 		
+		t_con.Cloned = nil;
+		t_con.Clone.Whitelist('function');
+
+		t_con.Destroyed = nil;
+		t_con.Destroyed.Whitelist('function');
+
 		t_con.Constructor = nil;
 		t_con.Constructor.Whitelist('function');
+
 		table.insert(registry, t_con);
 		return t_obj;
 	end

@@ -65,11 +65,11 @@ tc.__call = function(tween, ...)
         Callback = ts.Callback;
     end
 
-    Members = fw.verifyarg(Members, 'table', print) and Members or {};
-    Style = fw.verifyarg(Style, 'BUILTIN::TweenStyle', print) and Style or Tween.Style.Sine;
-    Time = fw.verifyarg(Time, 'number', print) and Time or 1;
-    Speed = fw.verifyarg(Speed, 'number', print) and Speed or 1;
-    Override = fw.verifyarg(Override, 'boolean', print) and Override or true;
+    Members = fw.verifyarg(Members, 'table') and Members or {};
+    Style = fw.verifyarg(Style, 'BUILTIN::TweenStyle') and Style or Tween.Style.Sine;
+    Time = fw.verifyarg(Time, 'number') and Time or 1;
+    Speed = fw.verifyarg(Speed, 'number') and Speed or 1;
+    Override = fw.verifyarg(Override, 'boolean') and Override or true;
     
     local connection;
     connection = fw.Engine.Tick:Connect(function(dt)

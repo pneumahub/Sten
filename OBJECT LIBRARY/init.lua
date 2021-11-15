@@ -100,14 +100,12 @@ table.unpack = function(...)
 	local temp = {};
 	for i, v in pairs({...}) do
 		for _, v in pairs(v) do
-			print(v)
 			local ii = #temp + 1;
 			temp[ii] = v;
 			f = f~='' and f..', ' or f;
 			f = f..'temp['..ii..']';
 		end
 	end
-	print(string.format(str, f))
 	f = loadstring(string.format(str, f));
 	getfenv(f).temp = temp;
 	return f()

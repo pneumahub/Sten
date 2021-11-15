@@ -40,7 +40,6 @@ reg.Constructor = function(obj, con, ...)
     local polygon = {};
     local args = {...};
     for i = 1, #args do
-        print('Hello?')
         local v = args[i];
         if type(v) == 'number' then
             local v2 = args[i + 1];
@@ -68,7 +67,6 @@ reg.Constructor = function(obj, con, ...)
         return function()
             if #polygon == 0 then return end;
             k = k + 1;
-            print(table.unpack(obj[k]))
             return k ~= #polygon/2 + 1 and k or nil, obj[k];
 		end, t, nil
     end
@@ -103,6 +101,61 @@ reg.Constructor = function(obj, con, r, g, b)
 
     con.A = 1;
     con.A.Whitelist();
+end
+
+local reg = fw.new.Register('Font');
+reg.Library = "BUILTIN::Datatypes";
+
+reg.Constructor = function(obj, con, path)
+    local OBJECT = love.graphics.newFont(path);
+
+    con.getAscent = OBJECT.getAscent;
+    con.getAscent.Locked = true;
+
+    con.getBaseline = OBJECT.getBaseline;
+    con.getBaseline.Locked = true;
+    
+    con.getDPIScale = OBJECT.getDPIScale;
+    con.getDPIScale.Locked = true;
+
+    con.getDescent = OBJECT.getDescent;
+    con.getDescent.Locked = true;
+
+    con.getFilter = OBJECT.getFilter;
+    con.getFilter.Locked = true;
+
+    con.getHeight = OBJECT.getHeight;
+    con.getHeight.Locked = true;
+
+    con.getLineHeight = OBJECT.getLineHeight;
+    con.getLineHeight.Locked = true;
+
+    con.getWidth = OBJECT.getWidth;
+    con.getWidth.Locked = true;
+
+    con.getWrap = OBJECT.getWrap;
+    con.getWrap.Locked = true;
+
+    con.hasGlyphs = OBJECT.hasGlyphs;
+    con.hasGlyphs.Locked = true;
+
+    con.setFallbacks = OBJECT.setFallbacks;
+    con.setFallbacks.Locked = true;
+
+    con.setFilter = OBJECT.setFilter;
+    con.setFilter.Locked = true;
+
+    con.setLineHeight = OBJECT.setLineHeight;
+    con.setLineHeight.Locked = true;
+
+    local oldCb = con.__DestroyCallback.Value;
+    con.__DestroyCallback = function()
+        OBJECT:release();
+        for i, v in pairs(con) do
+            v.Changed:Destroy();
+        end
+        oldCb();
+    end
 end
 
 return true;

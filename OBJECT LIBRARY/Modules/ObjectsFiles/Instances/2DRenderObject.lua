@@ -22,7 +22,6 @@ reg.Constructor = function(obj, con)
             love.graphics.setColor(obj.Color.R/255, obj.Color.G/255, obj.Color.B/255, obj.Color.A);
             love.graphics.polygon('fill', table.unpack(table.unpack(p)));
         end
-
         oldRender(...);
     end
 end
